@@ -1,5 +1,6 @@
 #!/bin/bash -e
 . apps.sh
+. proxy.sh
 
 installer="yum"
 apps=""
@@ -21,14 +22,15 @@ SetInstaller() {
 
 
 InstallAPP() {
-	echo "==Install APP"
+	echo "==begin to install app"
 	sleep 1
 	for app in $apps; do
-		sudo $installer install $app
+		sudo $installer install -y $app
 	done
 }
 
 SetupVIM() {
+	echo "==begin to set vim"
 	cwd=$(pwd)
 	cd /tmp
 	git clone https://github.com/zhiyuan1024/vim_conifg.git
@@ -37,13 +39,25 @@ SetupVIM() {
 	cd cwd
 }
 
+SetupZShell() {
+	echo "==begin to setup zsh"
+	sudo $installer install -y zsh
+	export http_proxy=$HTTPProxy
+	export https_proxy=$HTTPProxy
+	sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+	unset http_proxy
+	unset https_proxy
+}
+
 
 Init() {
 	SetInstaller
+	sudo $installer -y upgrade
 }
 
 Run() {
 	InstallAPP
+	SetupZShell
 	SetupVIM
 }
 
